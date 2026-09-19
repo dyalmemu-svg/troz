@@ -7,9 +7,15 @@ export default async function handler(req, res) {
     return res.status(400).send('Missing link identifier.');
   }
 
+  // Use EDGE_CONFIG first, fallback to GLOBAL_CONFIG
+  const connectionString = process.env.EDGE_CONFIG || process.env.GLOBAL_CONFIG;
+
+  if (!connectionString) {
+    return res.status(500).send('Server Error: Missing EDGE_CONFIG environment variable in Vercel.');
+  }
+
   try {
-    // Pass the explicit environment variable name
-    const edgeConfig = createClient(process.env.GLOBAL_CONFIG);
+    const edgeConfig = createClient(connectionString);
     const slug = payload.split('.')[0];
     const targetUrl = await edgeConfig.get(slug);
 
