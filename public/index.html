@@ -8,22 +8,48 @@
     input, button { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
     button { background: #000; color: #fff; border: none; cursor: pointer; font-weight: bold; }
     #result { margin-top: 15px; word-break: break-all; background: #f4f4f4; padding: 10px; border-radius: 4px; }
+    #generatorApp { display: none; }
   </style>
 </head>
 <body>
-  <h2>Redirect Link Generator</h2>
-  
-  <label>Target Destination URL:</label>
-  <input type="text" id="targetUrl" placeholder="https://example.com" />
 
-  <label>Secret Key:</label>
-  <input type="password" id="secretKey" value="MySecretKey2026" />
+  <!-- 1. Password Protection Screen -->
+  <div id="loginScreen">
+    <h2>Access Protection</h2>
+    <label>Enter Master Password:</label>
+    <input type="password" id="accessPassword" placeholder="Enter password to access..." />
+    <button onclick="checkAccess()">Unlock Generator</button>
+  </div>
 
-  <button onclick="generateLink()">Generate Link</button>
+  <!-- 2. Generator Interface (Hidden by default) -->
+  <div id="generatorApp">
+    <h2>Redirect Link Generator</h2>
+    
+    <label>Target Destination URL:</label>
+    <input type="text" id="targetUrl" placeholder="https://example.com" />
 
-  <div id="result">Your link will appear here...</div>
+    <label>Secret Key:</label>
+    <input type="password" id="secretKey" value="MySecretKey2026" />
+
+    <button onclick="generateLink()">Generate Link</button>
+
+    <div id="result">Your link will appear here...</div>
+  </div>
 
   <script>
+    // Set your desired UI password here
+    const PAGE_PASSWORD = "Burnitall2026@";
+
+    function checkAccess() {
+      const inputPass = document.getElementById('accessPassword').value;
+      if (inputPass === PAGE_PASSWORD) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('generatorApp').style.display = 'block';
+      } else {
+        alert('Incorrect password!');
+      }
+    }
+
     async function generateLink() {
       const target = document.getElementById('targetUrl').value.trim();
       const secret = document.getElementById('secretKey').value.trim();
