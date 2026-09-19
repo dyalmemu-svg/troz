@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vercel Link Generator</title>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; }
+    input, button { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; }
+    button { background: #000; color: #fff; border: none; cursor: pointer; font-weight: bold; }
+    #result { margin-top: 15px; word-break: break-all; background: #f4f4f4; padding: 10px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h2>Redirect Link Generator</h2>
+  
+  <label>Target Destination URL:</label>
+  <input type="text" id="targetUrl" placeholder="https://example.com" />
+
+  <label>Secret Key:</label>
+  <input type="password" id="secretKey" value="MySecretKey2026" />
+
+  <button onclick="generateLink()">Generate Link</button>
+
+  <div id="result">Your link will appear here...</div>
+
+  <script>
+    async function generateLink() {
+      const target = document.getElementById('targetUrl').value.trim();
+      const secret = document.getElementById('secretKey').value.trim();
+
+      if (!target || !secret) {
+        alert('Please fill in both fields.');
+        return;
+      }
+
+      // 1. Build payload JSON
+      const config = { d: target };
+      const jsonString = JSON.stringify(config);
+
+      // 2. Base64 encode JSON
+      const base64Payload = btoa(jsonString);
+
+      // 3. Generate HMAC SHA-256 signature
+      const encoder = new TextEncoder();
+      const keyData = encoder.encode(secret);
+      const msgData = encoder.encode(base64Payload);
+
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+      );
+
+      const signatureBuffer = await crypto.subtle.sign('HMAC', cryptoKey, msgData);
+      const hashArray = Array.from(new Uint8Array(signatureBuffer));
+      const hexSignature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 12);
+
+      // 4. Construct final URL
+      const baseUrl = window.location.origin;
+      const finalUrl = `${baseUrl}/r/${base64Payload}.${hexSignature}`;
+
+      document.getElementById('result').innerHTML = `
+        <strong>Generated Link:</strong><br>
+        <a href="${finalUrl}" target="_blank">${finalUrl}</a>
+      `;
+    }
+  </script>
+</body>
+</html>
