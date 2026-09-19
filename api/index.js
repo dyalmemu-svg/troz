@@ -1,4 +1,4 @@
-import { get } from '@vercel/edge-config';
+import { createClient } from '@vercel/edge-config';
 
 export default async function handler(req, res) {
   const { payload } = req.query;
@@ -8,8 +8,10 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Pass the explicit environment variable name
+    const edgeConfig = createClient(process.env.GLOBAL_CONFIG);
     const slug = payload.split('.')[0];
-    const targetUrl = await get(slug);
+    const targetUrl = await edgeConfig.get(slug);
 
     if (!targetUrl) {
       return res.status(404).send('Link not found.');
