@@ -1,23 +1,26 @@
-export default function handler(req, res) {
+import { get } from '@vercel/edge-config';
+
+export default async function handler(req, res) {
   const { payload } = req.query;
 
   if (!payload) {
-    return res.status(400).send('Missing payload token.');
+    return res.status(400).send('Missing link identifier.');
   }
 
   try {
-    // 1. Decode the Base64 string from the URL
-    const decodedText = Buffer.from(payload, 'base64').toString('utf-8');
-    const data = JSON.parse(decodedText);
+    // 1. Get the key name (e.g., "promo1" from /r/promo1)
+    const slug = payload.split('.')[0];
 
-    // 2. Validate destination URL
-    if (!data.d) {
-      return res.status(400).send('Target URL missing in payload.');
+    // 2. Fetch destination directly from Edge Config
+    const targetUrl = await get(slug);
+
+    if (!targetUrl) {
+      return res.status(404).send('Link not found or inactive.');
     }
 
-    // 3. Issue immediate 307 Temporary Redirect
-    return res.redirect(307, data.d);
+    // 3. Perform 307 redirect
+    return res.redirect(307, targetUrl);
   } catch (error) {
-    return res.status(400).send('Invalid or corrupted Base64 payload.');
+    return res.status(500).send('Server error loading link.');
   }
 }
