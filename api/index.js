@@ -1,4 +1,4 @@
-import { get } from '@vercel/global-config';
+import { get } from '@vercel/edge-config';
 
 export default async function handler(req, res) {
   const { payload } = req.query;
@@ -12,11 +12,11 @@ export default async function handler(req, res) {
     const targetUrl = await get(slug);
 
     if (!targetUrl) {
-      return res.status(404).send('Link not found or inactive.');
+      return res.status(404).send('Link not found.');
     }
 
     return res.redirect(307, targetUrl);
   } catch (error) {
-    return res.status(500).send('Server error loading link.');
+    return res.status(500).send(`Server Error: ${error.message}`);
   }
 }
