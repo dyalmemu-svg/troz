@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/r/:payload*",
+      "destination": "/api/index?payload=:payload*"
+    }
+  ]
+}
